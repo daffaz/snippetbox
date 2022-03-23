@@ -3,8 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"html/template"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -24,32 +22,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 
 	data := &templateData{Snippets: s}
 
-	files := []string{
-		"./ui/html/home.page.gohtml",
-		"./ui/html/base.layout.gohtml",
-		"./ui/html/footer.partial.gohtml",
-	}
-
-	// // Use the template.ParseFiles() function to read the template file into a
-	// // template set. If there's an error, we log the detailed error message and use
-	// // the http.Error() function to send a generic 500 Internal Server Error
-	// // response to the user.
-	template, err := template.ParseFiles(files...)
-	if err != nil {
-		app.errorLog.Println(err.Error())
-		app.serverError(w, err)
-		return
-	}
-
-	for _, v := range data.Snippets {
-		log.Println(v.Content)
-	}
-
-	err = template.Execute(w, data)
-	if err != nil {
-		app.infoLog.Println(err.Error())
-		app.serverError(w, err)
-	}
+	app.render(w, r, "home.page.gohtml", data)
 }
 
 func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
@@ -70,20 +43,8 @@ func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	data := &templateData{Snippet: s}
-	files := []string{
-		"./ui/html/show.page.gohtml",
-		"./ui/html/base.layout.gohtml",
-		"./ui/html/footer.partial.gohtml",
-	}
-	ts, err := template.ParseFiles(files...)
-	if err != nil {
-		app.serverError(w, err)
-	}
 
-	err = ts.Execute(w, data)
-	if err != nil {
-		app.serverError(w, err)
-	}
+	app.render(w, r, "show.page.gohtml", data)
 }
 
 func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
