@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"html/template"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -16,36 +17,39 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data, err := app.snippets.Latest()
+	s, err := app.snippets.Latest()
 	if err != nil {
 		app.serverError(w, err)
 	}
 
-	for _, snippet := range data {
-		fmt.Fprintf(w, "%v\n", snippet)
+	data := &templateData{Snippets: s}
+
+	files := []string{
+		"./ui/html/home.page.gohtml",
+		"./ui/html/base.layout.gohtml",
+		"./ui/html/footer.partial.gohtml",
 	}
-	// files := []string{
-	// 	"./ui/html/home.page.gohtml",
-	// 	"./ui/html/footer.partial.gohtml",
-	// 	"./ui/html/base.layout.gohtml",
-	// }
 
 	// // Use the template.ParseFiles() function to read the template file into a
 	// // template set. If there's an error, we log the detailed error message and use
 	// // the http.Error() function to send a generic 500 Internal Server Error
 	// // response to the user.
-	// template, err := template.ParseFiles(files...)
-	// if err != nil {
-	// 	app.errorLog.Println(err.Error())
-	// 	app.serverError(w, err)
-	// 	return
-	// }
+	template, err := template.ParseFiles(files...)
+	if err != nil {
+		app.errorLog.Println(err.Error())
+		app.serverError(w, err)
+		return
+	}
 
-	// err = template.Execute(w, nil)
-	// if err != nil {
-	// 	app.infoLog.Println(err.Error())
-	// 	app.serverError(w, err)
-	// }
+	for _, v := range data.Snippets {
+		log.Println(v.Content)
+	}
+
+	err = template.Execute(w, data)
+	if err != nil {
+		app.infoLog.Println(err.Error())
+		app.serverError(w, err)
+	}
 }
 
 func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {

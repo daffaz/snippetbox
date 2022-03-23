@@ -60,7 +60,7 @@ func (m *SnippetModel) Latest() ([]*models.Snippet, error) {
 	for rows.Next() {
 		s := &models.Snippet{}
 
-		if err = rows.Scan(&s.ID, &s.Title, &s.Content, &s.Content, &s.Expires); err != nil {
+		if err = rows.Scan(&s.ID, &s.Title, &s.Content, &s.Created, &s.Expires); err != nil {
 			return nil, err
 		}
 
