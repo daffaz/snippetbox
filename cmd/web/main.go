@@ -6,14 +6,17 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/daffaz/snippetbox/pkg/models/mysql"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/golangcollege/sessions"
 )
 
 type application struct {
 	infoLog       *log.Logger
 	errorLog      *log.Logger
+	session       *sessions.Session
 	snippets      *mysql.SnippetModel
 	templateCache map[string]*template.Template
 }
@@ -23,6 +26,7 @@ func main() {
 	errorLog := log.New(os.Stderr, "[ERROR]\t", log.Ldate|log.Ltime|log.Lshortfile)
 
 	dsn := "CONFIDENTAL:CONFIDENTAL@/CONFIDENTAL?parseTime=true"
+	secret := "s6Ndh+pPbnzHbS*+9Pk8qGWhTzbpa@ge"
 
 	db, err := openDB(dsn)
 	if err != nil {
@@ -35,9 +39,13 @@ func main() {
 		errorLog.Fatal(err)
 	}
 
+	session := sessions.New([]byte(secret))
+	session.Lifetime = 12 * time.Hour
+
 	app := &application{
 		infoLog:       infoLog,
 		errorLog:      errorLog,
+		session:       session,
 		snippets:      &mysql.SnippetModel{DB: db},
 		templateCache: templateCache,
 	}

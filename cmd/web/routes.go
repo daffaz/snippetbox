@@ -10,6 +10,10 @@ import (
 func (app *application) routes() http.Handler {
 	// middleware chain
 	standardMiddleware := alice.New(app.recoverPanic, app.logRequest, secureHeaders)
+
+	// dynamic middleware
+	dynamiMiddleware := alice.New(app.session.Enable)
+
 	// initialize serve mux
 	mux := pat.New()
 
@@ -18,9 +22,9 @@ func (app *application) routes() http.Handler {
 
 	// route
 	mux.Get("/", http.HandlerFunc(app.home))
-	mux.Get("/snippet/create", http.HandlerFunc(app.createSnippetForm))
-	mux.Post("/snippet/create", http.HandlerFunc(app.createSnippet))
-	mux.Get("/snippet/:id", http.HandlerFunc(app.showSnippet))
+	mux.Get("/snippet/create", dynamiMiddleware.ThenFunc(http.HandlerFunc(app.createSnippetForm)))
+	mux.Post("/snippet/create", dynamiMiddleware.ThenFunc(http.HandlerFunc(app.createSnippet)))
+	mux.Get("/snippet/:id", dynamiMiddleware.ThenFunc(http.HandlerFunc(app.showSnippet)))
 	// static file route
 	mux.Get("/static/", http.StripPrefix("/static", fileServer))
 

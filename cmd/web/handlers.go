@@ -38,9 +38,10 @@ func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	data := &templateData{Snippet: s}
 
-	app.render(w, r, "show.page.gohtml", data)
+	app.render(w, r, "show.page.gohtml", &templateData{
+		Snippet: s,
+	})
 }
 
 func (app *application) createSnippetForm(w http.ResponseWriter, r *http.Request) {
@@ -73,5 +74,6 @@ func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	app.session.Put(r, "flash", "Snippet created successfully")
 	http.Redirect(w, r, fmt.Sprintf("/snippet/%d", id), http.StatusSeeOther)
 }
