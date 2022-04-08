@@ -41,6 +41,7 @@ func main() {
 
 	session := sessions.New([]byte(secret))
 	session.Lifetime = 12 * time.Hour
+	session.Secure = true
 
 	app := &application{
 		infoLog:       infoLog,
@@ -56,7 +57,7 @@ func main() {
 		ErrorLog: errorLog,
 	}
 	infoLog.Printf("Running in port %s\n", srv.Addr)
-	errorLog.Fatal(srv.ListenAndServe())
+	errorLog.Fatal(srv.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem"))
 }
 
 func openDB(dsn string) (*sql.DB, error) {
